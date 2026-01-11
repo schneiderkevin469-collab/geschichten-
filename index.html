@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StorySphere</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body,html{height:100%;font-family:Arial, sans-serif;background:#000;color:#fff;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;transition:all 0.3s;}
+
+/* Header */
+header{padding:40px 20px;text-align:center;width:100%;}
+header h1{font-size:4em;color:#fff;margin-bottom:20px;}
+
+/* Suche */
+#searchBar{margin:20px auto;padding:10px 20px;width:300px;border-radius:10px;border:2px solid #fff;background:#111;color:#fff;font-size:1em;}
+#searchBar::placeholder{color:#ccc;}
+
+/* Loading Screen */
+#loadingScreen{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:20px;background:#222;border-radius:15px;overflow:hidden;z-index:10;}
+#progress{width:0%;height:100%;background:#fff;border-radius:15px;transition:width 0.2s;}
+
+/* Story Cards */
+#storyContainer{display:flex;flex-wrap:wrap;justify-content:center;margin:40px auto;gap:25px;max-width:1200px;transition:all 0.5s;}
+.storyCard{background:#111;border:2px solid #fff;border-radius:15px;width:300px;padding:25px;text-align:center;transition:all 0.5s ease;cursor:pointer;opacity:0;transform:translateY(50px);}
+.storyCard.show{opacity:1;transform:translateY(0);}
+.storyCard.hide{opacity:0;transform:translateY(50px);}
+.storyCard:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 5px 15px rgba(255,255,255,0.2);}
+.storyCard h3{color:#fff;margin-bottom:15px;}
+
+/* Download Button */
+.downloadBtn{margin-top:15px;padding:10px 20px;font-size:1em;border-radius:8px;border:none;background:#111;color:#fff;cursor:pointer;transition:all 0.3s;}
+.downloadBtn:hover{background:#222;}
+
+/* Footer */
+footer{padding:20px;text-align:center;color:#fff;font-size:0.9em;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>StorySphere</h1>
+</header>
+
+<input type="text" id="searchBar" placeholder="Suche nach Geschichten...">
+
+<div id="loadingScreen"><div id="progress"></div></div>
+
+<div id="storyContainer"></div>
+
+<footer>Made by Kevin</footer>
+
+<script>
+// Geschichten mit PDF
+let stories=[
+  {title:"Die Legende von Aetheria", pdf:"Die Legende von Aetheria.pdf"},
+  {title:"Der Funke der Menschlichkeit", pdf:"Der Funke der Menschlichkeit.pdf"}
+];
+
+// Loading Animation
+let progress=0;
+let loadingInterval=setInterval(()=>{
+  progress+=Math.floor(Math.random()*4)+1;
+  if(progress>100) progress=100;
+  document.getElementById('progress').style.width=progress+'%';
+  if(progress===100){
+    clearInterval(loadingInterval);
+    document.getElementById('loadingScreen').style.display='none';
+    showStories();
+  }
+},50);
+
+// Stories anzeigen mit Animation
+function showStories(filter=""){
+  const container=document.getElementById('storyContainer');
+  const cards=Array.from(container.children);
+
+  // Alte Karten ausblenden
+  cards.forEach((card)=>{
+    card.classList.remove('show');
+    card.classList.add('hide');
+    setTimeout(()=>{card.remove();}, 300);
+  });
+
+  // Neue Karten erstellen
+  setTimeout(()=>{
+    stories.forEach((story,index)=>{
+      if(story.title.toLowerCase().includes(filter.toLowerCase())){
+        const card=document.createElement('div');
+        card.className='storyCard';
+        card.innerHTML=`<h3>${story.title}</h3>
+                        <button class="downloadBtn" onclick="downloadPDF('${story.pdf}')">PDF herunterladen</button>`;
+        container.appendChild(card);
+        setTimeout(()=>{card.classList.add("show");card.classList.remove('hide');}, index*150);
+      }
+    });
+  }, 350);
+}
+
+// PDF herunterladen
+function downloadPDF(pdfPath){
+  const link = document.createElement('a');
+  link.href = pdfPath;
+  link.download = pdfPath;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Suche
+document.getElementById('searchBar').addEventListener('input', function(){
+  showStories(this.value);
+});
+</script>
+</body>
+</html>
